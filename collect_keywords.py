@@ -11,8 +11,19 @@ import signaturehelper
 
 class NaverShoppingCrawler:
     def __init__(self):
+        # Chrome 옵션 설정
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # GUI 없이 실행
+        chrome_options.add_argument("--no-sandbox")  # 샌드박스 비활성화
+        chrome_options.add_argument("--disable-dev-shm-usage")  # 메모리 사용 최적화
+        chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
+        chrome_options.add_argument("--remote-debugging-port=9222")  # 디버깅 포트 설정
+
         # Selenium 드라이버 초기화
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=chrome_options
+        )
 
     def get_brand_list(self, keyword):
         """
