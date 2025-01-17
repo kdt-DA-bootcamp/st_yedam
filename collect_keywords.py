@@ -20,11 +20,14 @@ class NaverShoppingCrawler:
         chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
         chrome_options.add_argument("--remote-debugging-port=9222")  # 디버깅 포트 설정
 
-        # Selenium 드라이버 초기화
-        self.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=chrome_options
-        )
+        # 수동으로 지정한 Chrome 및 ChromeDriver 경로
+        chrome_path = "/usr/bin/google-chrome"  # Chrome 설치 경로
+        driver_path = "/usr/bin/chromedriver"  # ChromeDriver 설치 경로
+
+        chrome_options.binary_location = chrome_path
+
+        # 수동 설치된 ChromeDriver를 직접 사용
+        self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
 
     def get_brand_list(self, keyword):
         """
