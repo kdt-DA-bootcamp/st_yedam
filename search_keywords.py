@@ -6,12 +6,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from collect_keywords import NaverShoppingCrawler
 from compare_keywords import calculator
 
-chrome_version = os.popen("google-chrome --version").read().strip()
-chromedriver_version = os.popen("chromedriver --version").read().strip()
-
-st.write(f"🔍 Chrome Version: {chrome_version}")
-st.write(f"🔍 ChromeDriver Version: {chromedriver_version}")
-
 st.title("스마트스토어 상품명 키워드 봇")
 st.write("내 상품이 상위노출되려면, 어떤 키워드를 써야할까?")
 
