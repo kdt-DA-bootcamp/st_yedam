@@ -9,6 +9,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 import signaturehelper
+import chromedriver_autoinstaller
 
 class NaverShoppingCrawler:
     def __init__(self):
@@ -20,14 +21,9 @@ class NaverShoppingCrawler:
         chrome_options.add_argument("--disable-gpu")  # GPU 가속 비활성화
         chrome_options.add_argument("--remote-debugging-port=9222")  # 디버깅 포트 설정
 
-        # 수동으로 지정한 Chrome 및 ChromeDriver 경로
-        chrome_path = "/usr/bin/google-chrome"  # Chrome 설치 경로
-        driver_path = "/usr/bin/chromedriver"  # ChromeDriver 설치 경로
-
-        chrome_options.binary_location = chrome_path
-
-        # 수동 설치된 ChromeDriver를 직접 사용
-        self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
+        # ChromeDriver 자동 설치 및 경로 설정
+        chromedriver_autoinstaller.install()  # 현재 시스템에 맞는 ChromeDriver 자동 다운로드 및 설치
+        self.driver = webdriver.Chrome(options=chrome_options)
 
     def get_brand_list(self, keyword):
         """
