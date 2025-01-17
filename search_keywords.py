@@ -1,6 +1,8 @@
+import sys
+import os
 import streamlit as st
 import pandas as pd
-
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from collect_keywords import NaverShoppingCrawler
 from compare_keywords import calculator
 
