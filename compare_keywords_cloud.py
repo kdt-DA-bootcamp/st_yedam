@@ -9,7 +9,7 @@ import pandas as pd
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from collect_keywords_cloud import NaverShoppingCrawler
+import collect_keywords_cloud
 
 # 환경 변수 로드
 load_dotenv()
