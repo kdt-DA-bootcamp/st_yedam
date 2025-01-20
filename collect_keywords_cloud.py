@@ -2,20 +2,18 @@ import time
 import requests
 import json
 import re
-import os
+import streamlit as st
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 import signaturehelper
 
 class NaverShoppingCrawler:
     def __init__(self):
         """환경 변수 로드 (한 번만 실행)"""
-        load_dotenv()
-        self.client_id = os.getenv('CLIENT_ID')
-        self.client_secret = os.getenv('CLIENT_SECRET')
-        self.api_key = os.getenv('API_KEY')
-        self.secret_key = os.getenv('SECRET_KEY')
-        self.customer_id = os.getenv('CUSTOMER_ID')
+        self.client_id = st.secrets["CLIENT_ID"]
+        self.client_secret = st.secrets["CLIENT_SECRET"]
+        self.api_key = st.secrets["API_KEY"]
+        self.secret_key = st.secrets["SECRET_KEY"]
+        self.customer_id = st.secrets["CUSTOMER_ID"]
         self.base_url = 'https://api.naver.com'
         self.shop_api_url = "https://openapi.naver.com/v1/search/shop.json"
         

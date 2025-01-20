@@ -1,20 +1,14 @@
-import os
+import streamlit as st
 import urllib.request
 import json
 import time
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
 from collections import Counter
 import pandas as pd
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import collect_keywords_cloud
-
-# 환경 변수 로드
-load_dotenv()
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 
 # 대표 키워드 사전 자동 생성 함수
 def generate_category_keywords(keywords):
@@ -42,6 +36,7 @@ def calculate_frequency_score(keywords):
 
 # 유행성 점수 계산 (멀티스레딩 적용)
 def fetch_trend_score(chunk, start_date, end_date):
+    """네이버 데이터랩 API를 이용한 트렌드 점수 계산"""
     url = "https://openapi.naver.com/v1/datalab/search"
     keyword_groups = [{"groupName": kw[:19].strip(), "keywords": [kw.strip()]} for kw in chunk if kw and kw.strip()]
     body = json.dumps({
@@ -50,26 +45,29 @@ def fetch_trend_score(chunk, start_date, end_date):
         "timeUnit": "date",
         "keywordGroups": keyword_groups
     }, ensure_ascii=False).encode("utf-8")
+
+    # 함수 내부에서 환경 변수 로드 (Streamlit 실행 시 오류 방지)
+    client_id = st.secrets["CLIENT_ID"]
+    client_secret = st.secrets["CLIENT_SECRET"]
+
     request = urllib.request.Request(url)
-    request.add_header("X-Naver-Client-Id", CLIENT_ID)
-    request.add_header("X-Naver-Client-Secret", CLIENT_SECRET)
+    request.add_header("X-Naver-Client-Id", client_id)
+    request.add_header("X-Naver-Client-Secret", client_secret)
     request.add_header("Content-Type", "application/json")
+
+    response = urllib.request.urlopen(request, data=body)
+    result = json.loads(response.read().decode("utf-8"))
+
     scores = {}
-    try:
-        response = urllib.request.urlopen(request, data=body)
-        if response.getcode() == 200:
-            result = json.loads(response.read().decode("utf-8"))
-            for item in result.get("results", []):
-                keyword = item["title"]
-                data = item.get("data", [])
-                if len(data) < 2:
-                    scores[keyword] = 0
-                else:
-                    recent = data[-1]["ratio"]
-                    previous_avg = sum(d["ratio"] for d in data[:-1]) / max(len(data) - 1, 1)
-                    scores[keyword] = recent / previous_avg if previous_avg != 0 else 0
-    except urllib.error.HTTPError as e:
-        print(f"❌ HTTPError: {e}")
+    for item in result.get("results", []):
+        keyword = item["title"]
+        data = item.get("data", [])
+        if len(data) < 2:
+            scores[keyword] = 0
+        else:
+            recent = data[-1]["ratio"]
+            previous_avg = sum(d["ratio"] for d in data[:-1]) / max(len(data) - 1, 1)
+            scores[keyword] = recent / previous_avg if previous_avg != 0 else 0
     return scores
 
 def calculate_trend_scores(keywords):
@@ -97,15 +95,3 @@ def calculator(keyword, crawler, max_keywords=15):
             "총점": frequency_scores.get(kw, 0) + trend_scores.get(kw, 0),
         })
     return sorted(scores, key=lambda x: x["총점"], reverse=True)[:max_keywords]
-
-# 실행
-if __name__ == "__main__":
-    keyword = input("키워드를 입력하세요: ")
-    crawler = NaverShoppingCrawler()
-    sorted_scores = calculator(keyword, crawler)
-    print("📢 상품명에 적합한 키워드:")
-    for idx, score in enumerate(sorted_scores, start=1):
-        print(f"""{idx}. 키워드: {score['키워드']}, 
-        빈도 점수: {score['빈도 점수']:.2f}, 
-        유행성 점수: {score['유행성 점수']:.2f}, 
-        총합 점수: {score['총점']:.2f}""")
