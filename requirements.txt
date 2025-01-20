@@ -3,5 +3,4 @@ beautifulsoup4
 requests
 pandas
 numpy
-concurrent.futures
 matplotlib
