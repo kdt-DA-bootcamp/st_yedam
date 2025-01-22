@@ -16,6 +16,16 @@ class NaverShoppingCrawler:
         self.customer_id = st.secrets["CUSTOMER_ID"]
         self.base_url = 'https://api.naver.com'
         self.shop_api_url = "https://openapi.naver.com/v1/search/shop.json"
+
+        # SECRET_KEY 디코딩 테스트
+        import base64
+        try:
+            decoded_key = base64.b64decode(self.secret_key)
+            print(" SECRET_KEY 디코딩 성공:", decoded_key)
+        except Exception as e:
+            print(" SECRET_KEY 디코딩 오류:", str(e))
+
+        self.shop_api_url = "https://openapi.naver.com/v1/search/shop.json"
         
     def get_shopping_trend(self, keyword):
         """네이버 쇼핑 인기 상품 키워드 가져오기 (API 연동)"""
@@ -49,16 +59,17 @@ class NaverShoppingCrawler:
 
     def get_trend_keywords(self, keyword):
         """네이버 광고 API에서 트렌드 키워드 가져오기"""
+
         def get_header(method, uri):
             timestamp = str(round(time.time() * 1000))  # 요청 시간
-            signature = signaturehelper.Signature.generate(timestamp, method, uri, self.secret_key)
+            signature = signaturehelper.Signature.generate(timestamp, method, uri, st.secrets["SECRET_KEY"])
             return {
                 'Content-Type': 'application/json; charset=UTF-8',
                 'X-Timestamp': timestamp,
-                'X-API-KEY': self.api_key,
-                'X-Customer': str(self.customer_id),
+                'X-API-KEY': st.secrets["API_KEY"],
+                'X-Customer': str(st.secrets["CUSTOMER_ID"]),
                 'X-Signature': signature
-            }
+    }
         
         uri = '/keywordstool'
         method = 'GET'
