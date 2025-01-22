@@ -16,16 +16,6 @@ class NaverShoppingCrawler:
         self.customer_id = st.secrets["CUSTOMER_ID"]
         self.base_url = 'https://api.naver.com'
         self.shop_api_url = "https://openapi.naver.com/v1/search/shop.json"
-
-        # SECRET_KEY 디코딩 테스트
-        import base64
-        try:
-            decoded_key = base64.b64decode(self.secret_key)
-            print(" SECRET_KEY 디코딩 성공:", decoded_key)
-        except Exception as e:
-            print(" SECRET_KEY 디코딩 오류:", str(e))
-
-        self.shop_api_url = "https://openapi.naver.com/v1/search/shop.json"
         
     def get_shopping_trend(self, keyword):
         """네이버 쇼핑 인기 상품 키워드 가져오기 (API 연동)"""
@@ -92,7 +82,20 @@ class NaverShoppingCrawler:
 
         keywords = []
         for item in keyword_list:
-            monthly_search = int(item['monthlyPcQcCnt']) + int(item['monthlyMobileQcCnt'])
+            pc_cnt = item.get('monthlyPcQcCnt', '0')
+            mobile_cnt = item.get('monthlyMobileQcCnt', '0')
+
+            # "< 10" 같은 값이 있을 경우 0으로 변환
+            if isinstance(pc_cnt, str) and "<" in pc_cnt:
+                pc_cnt = "0"
+            if isinstance(mobile_cnt, str) and "<" in mobile_cnt:
+                mobile_cnt = "0"
+
+            try:
+                monthly_search = int(pc_cnt) + int(mobile_cnt)
+            except ValueError:
+                monthly_search = 0  # 변환 실패 시 0으로 처리
+
             keywords.append((item['relKeyword'], monthly_search))
 
         # 중복 제거 후 상위 100개 키워드 반환
