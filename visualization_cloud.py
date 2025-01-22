@@ -3,6 +3,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.font_manager as fm
+import urllib.request
 import numpy as np
 import pandas as pd
 from compare_keywords_cloud import calculator
@@ -12,13 +13,13 @@ def get_crawler():
     from collect_keywords_cloud import NaverShoppingCrawler  # 함수 내부에서 import
     return NaverShoppingCrawler()
 
-# 한글 폰트 경로 설정
-font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+# 폰트를 저장할 Streamlit 전용 디렉토리 설정
+font_dir = os.path.join(os.getcwd(), ".streamlit/fonts")
+font_path = os.path.join(font_dir, "NanumGothic.ttf")
 
 # 폰트가 없으면 다운로드
 if not os.path.exists(font_path):
-    os.makedirs("/usr/share/fonts/truetype/nanum", exist_ok=True)
-    import urllib.request
+    os.makedirs(font_dir, exist_ok=True)  # 앱 디렉토리에 저장
     font_url = "https://github.com/naver/nanumfont/releases/latest/download/NanumGothic.ttf"
     urllib.request.urlretrieve(font_url, font_path)
 
