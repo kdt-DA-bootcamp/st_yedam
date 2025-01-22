@@ -7,6 +7,7 @@ import urllib.request
 import numpy as np
 import pandas as pd
 from compare_keywords_cloud import calculator
+import collect_keywords_cloud
 
 # import 지연 로딩 (순환 참조 방지)
 def get_crawler():
