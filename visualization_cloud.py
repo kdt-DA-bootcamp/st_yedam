@@ -1,5 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+import matplotlib.font_manager as fm
 import numpy as np
 import pandas as pd
 from compare_keywords_cloud import calculator
@@ -9,12 +11,20 @@ def get_crawler():
     from collect_keywords_cloud import NaverShoppingCrawler  # 함수 내부에서 import
     return NaverShoppingCrawler()
 
-# font 설정
-import matplotlib as mpl
-import matplotlib.font_manager as fm
-mpl.rcParams['axes.unicode_minus'] = False
-plt.rcParams["font.family"] = 'NanumGothic'
-plt.rc('font', family='Malgun Gothic')  # Windows용
+# 한글 폰트 경로 설정
+font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+
+# 폰트가 없으면 다운로드
+if not os.path.exists(font_path):
+    os.makedirs("/usr/share/fonts/truetype/nanum", exist_ok=True)
+    import urllib.request
+    font_url = "https://github.com/naver/nanumfont/releases/latest/download/NanumGothic.ttf"
+    urllib.request.urlretrieve(font_url, font_path)
+
+# Matplotlib에 폰트 추가 및 설정
+fm.fontManager.addfont(font_path)
+mpl.rc("font", family="NanumGothic")
+mpl.rcParams["axes.unicode_minus"] = False  # 마이너스(-) 기호 깨짐 방지
 
 # Streamlit UI 설정
 st.title("스마트스토어 상품명 키워드 분석")
