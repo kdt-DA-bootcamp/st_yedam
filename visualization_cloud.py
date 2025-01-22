@@ -44,17 +44,3 @@ if "sorted_scores" in st.session_state:
         score_df = pd.DataFrame(sorted_scores)
         score_df.index = [f"{i+1}위" for i in range(len(score_df))]
         st.table(score_df)
-
-        # 추가 트렌드 키워드 버튼
-        if st.button("추가 트렌드 키워드 보기"):
-            crawler = NaverShoppingCrawler()
-            additional_keywords = crawler.get_trend_keywords(keyword)
-            
-            # 검색 결과 저장
-            st.session_state["additional_keywords"] = additional_keywords
-    
-    # 추가 키워드 표시
-    if "additional_keywords" in st.session_state:
-        st.subheader("📢 추가 트렌드 키워드")
-        additional_df = pd.DataFrame({"추가 키워드": st.session_state["additional_keywords"]})
-        st.table(additional_df)
