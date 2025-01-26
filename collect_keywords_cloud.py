@@ -85,7 +85,7 @@ class NaverShoppingCrawler:
                 'X-Customer': str(self.customer_id),
                 'X-Signature': signature
             }
-        
+
         uri = '/keywordstool'
         method = 'GET'
         time.sleep(1)  # API 호출 제한 방지
@@ -102,10 +102,37 @@ class NaverShoppingCrawler:
             },
             headers=get_header(method, uri)
         )
-        
-        keyword_list = response.json().get('keywordList', [])
-        keywords = [(item['relKeyword'], int(item.get('monthlyPcQcCnt', '0')) + int(item.get('monthlyMobileQcCnt', '0'))) for item in keyword_list]
+
+        # 🎯 API 응답을 출력하여 디버깅
+        try:
+            data = response.json()
+            print("✅ 네이버 API 응답:", data)  # API 응답 확인
+        except Exception as e:
+            print("❌ API 응답 오류:", e)
+            return []
+
+        keyword_list = data.get('keywordList', [])
+
+        if not keyword_list:
+            print("⚠️ keywordList가 비어 있음!")
+            return []  # 빈 리스트 반환하여 오류 방지
+
+        keywords = []
+        for item in keyword_list:
+            try:
+                rel_keyword = item['relKeyword']
+                pc_qc_cnt = int(item.get('monthlyPcQcCnt', '0'))
+                mobile_qc_cnt = int(item.get('monthlyMobileQcCnt', '0'))
+                keywords.append((rel_keyword, pc_qc_cnt + mobile_qc_cnt))
+            except KeyError as e:
+                print(f"❌ KeyError: {e}, item: {item}")  # 특정 키가 없는 경우 오류 출력
+                continue
+            except ValueError as e:
+                print(f"❌ ValueError: {e}, item: {item}")  # 데이터 변환 오류 방지
+                continue
+
         return [item[0] for item in sorted(set(keywords), key=lambda x: x[1], reverse=True)[:100]]
+
 
     def get_total_keywords(self, keyword):
         """최종 키워드 리스트 반환 (쇼핑 트렌드 + 연관 키워드 + 트렌드 키워드 + 브랜드 목록)"""
