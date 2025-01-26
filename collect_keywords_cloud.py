@@ -20,6 +20,19 @@ class NaverShoppingCrawler:
         self.base_url = 'https://api.naver.com'
         self.csv_file = "brand_list.csv"
 
+    def get_header(self, method, uri):
+        """네이버 광고 API 호출을 위한 헤더 생성"""
+        timestamp = str(round(time.time() * 1000))
+        signature = signaturehelper.Signature.generate(timestamp, method, uri, self.secret_key)
+        return {
+            "Content-Type": "application/json; charset=UTF-8",
+            "X-Timestamp": timestamp,
+            "X-API-KEY": self.api_key,
+            "X-Customer": str(self.customer_id),
+            "X-Signature": signature
+        }
+
+
     def get_shopping_trend(self, keyword):
         """네이버 쇼핑 인기 상품 키워드 및 대표 카테고리 가져오기"""
         url = f"{self.api_url}?query={keyword}&display=15&start=1&sort=sim"
