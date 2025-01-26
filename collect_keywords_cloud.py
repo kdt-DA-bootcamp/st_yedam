@@ -75,72 +75,61 @@ class NaverShoppingCrawler:
 
     def get_trend_keywords(self, keyword):
         """네이버 광고 API에서 트렌드 키워드 가져오기"""
-        def get_header(method, uri):
-            timestamp = str(round(time.time() * 1000))
-            signature = signaturehelper.Signature.generate(timestamp, method, uri, self.secret_key)
-            return {
-                'Content-Type': 'application/json; charset=UTF-8',
-                'X-Timestamp': timestamp,
-                'X-API-KEY': self.api_key,
-                'X-Customer': str(self.customer_id),
-                'X-Signature': signature
-            }
-
-        uri = '/keywordstool'
-        method = 'GET'
-        time.sleep(1)  # API 호출 제한 방지
+        print(f"🔍 트렌드 키워드 요청: {keyword}")
 
         response = requests.get(
-            self.base_url + uri,
+            self.base_url + "/keywordstool",
             params={
-                'siteId': None,
-                'biztpId': None,
-                'hintKeywords': keyword,
-                'event': None,
-                'month': None,
-                'showDetail': '1'
+                "hintKeywords": keyword,
+                "showDetail": "1"
             },
-            headers=get_header(method, uri)
+            headers=self.get_header("GET", "/keywordstool")
         )
 
-        # 🎯 API 응답을 출력하여 디버깅
         try:
             data = response.json()
-            print("✅ 네이버 API 응답:", data)  # API 응답 확인
+            print(f"✅ API 응답 데이터: {data}")  # API 응답 확인
         except Exception as e:
-            print("❌ API 응답 오류:", e)
+            print(f"❌ API 응답 파싱 오류: {e}")
             return []
 
         keyword_list = data.get('keywordList', [])
-
         if not keyword_list:
-            print("⚠️ keywordList가 비어 있음!")
-            return []  # 빈 리스트 반환하여 오류 방지
+            print("⚠️ 트렌드 키워드가 비어 있음!")
+            return []  # 빈 리스트 반환
 
-        keywords = []
-        for item in keyword_list:
-            try:
-                rel_keyword = item['relKeyword']
-                pc_qc_cnt = int(item.get('monthlyPcQcCnt', '0'))
-                mobile_qc_cnt = int(item.get('monthlyMobileQcCnt', '0'))
-                keywords.append((rel_keyword, pc_qc_cnt + mobile_qc_cnt))
-            except KeyError as e:
-                print(f"❌ KeyError: {e}, item: {item}")  # 특정 키가 없는 경우 오류 출력
-                continue
-            except ValueError as e:
-                print(f"❌ ValueError: {e}, item: {item}")  # 데이터 변환 오류 방지
-                continue
+        return [item["relKeyword"] for item in keyword_list]
 
-        return [item[0] for item in sorted(set(keywords), key=lambda x: x[1], reverse=True)[:100]]
 
 
     def get_total_keywords(self, keyword):
         """최종 키워드 리스트 반환 (쇼핑 트렌드 + 연관 키워드 + 트렌드 키워드 + 브랜드 목록)"""
+        print(f"🔍 검색 키워드: {keyword}")
+
         total_keywords_list, top_category = self.get_shopping_trend(keyword)
-        total_keywords_list.extend(self.get_related_keywords(keyword))
-        total_keywords_list.extend(self.get_trend_keywords(keyword))
+        print(f"✅ 쇼핑 트렌드 키워드: {total_keywords_list}")
+        print(f"✅ 대표 카테고리: {top_category}")
+
+        related_keywords = self.get_related_keywords(keyword)
+        print(f"✅ 연관 키워드: {related_keywords}")
+
+        trend_keywords = self.get_trend_keywords(keyword)
+        print(f"✅ 트렌드 키워드: {trend_keywords}")
+
         brands = self.get_brand_lists(keyword)
+        print(f"✅ 브랜드 리스트: {brands}")
+
+        # 빈 값이 있는지 확인
+        if total_keywords_list is None or related_keywords is None or trend_keywords is None or brands is None:
+            print("❌ 키워드 수집 중 일부 데이터가 None입니다.")
+            return [], [], "카테고리 없음"
+
+        # 리스트가 비었을 경우 오류 방지
+        total_keywords_list.extend(related_keywords)
+        total_keywords_list.extend(trend_keywords)
+
         return total_keywords_list, brands, top_category
+
 
 if __name__ == "__main__":
     keyword = st.text_input("키워드를 입력하세요:")
