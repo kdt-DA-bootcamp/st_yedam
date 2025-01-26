@@ -7,7 +7,7 @@ from collections import Counter
 import pandas as pd
 import re
 from concurrent.futures import ThreadPoolExecutor
-from collect_keywords import NaverShoppingCrawler
+from collect_keywords_cloud import NaverShoppingCrawler
 
 # Streamlit secrets에서 API 키 가져오기
 CLIENT_ID = st.secrets["CLIENT_ID"]
