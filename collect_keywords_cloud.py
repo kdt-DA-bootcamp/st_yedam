@@ -95,19 +95,15 @@ class NaverShoppingCrawler:
             debug_logs.append(f"✅ API 응답 데이터: {data}")  # API 응답 확인
         except Exception as e:
             debug_logs.append(f"❌ API 응답 파싱 오류: {e}")
-            st.text_area("📋 디버깅 로그", "\n".join(debug_logs))
-            return []
+            return [], debug_logs  # ✅ `st.text_area()`를 마지막에 한 번만 실행하기 위해 변경
 
         keyword_list = data.get("keywordList", [])
         if not keyword_list:
             debug_logs.append("⚠️ 트렌드 키워드가 비어 있음!")
-            st.warning("⚠️ 트렌드 키워드가 비어 있음!")
-            st.text_area("📋 디버깅 로그", "\n".join(debug_logs))
-            return []  # 빈 리스트 반환
 
-        st.text_area("📋 디버깅 로그", "\n".join(debug_logs))
-        
-        return [item["relKeyword"] for item in keyword_list]
+        return [item["relKeyword"] for item in keyword_list], debug_logs  # ✅ 로그를 함께 반환
+
+
 
     def get_total_keywords(self, keyword):
         """최종 키워드 리스트 반환 (쇼핑 트렌드 + 연관 키워드 + 트렌드 키워드 + 브랜드 목록)"""
@@ -116,12 +112,3 @@ class NaverShoppingCrawler:
         total_keywords_list.extend(self.get_trend_keywords(keyword))
         brands = self.get_brand_lists(keyword)
         return total_keywords_list, brands, top_category
-
-if __name__ == "__main__":
-    keyword = st.text_input("키워드를 입력하세요:")
-    if keyword:
-        crawler = NaverShoppingCrawler()
-        total_keywords, brands, top_category = crawler.get_total_keywords(keyword)
-        st.write("**키워드 리스트:**", total_keywords)
-        st.write("**브랜드 리스트:**", brands)
-        st.write("**가장 많이 등장한 카테고리:**", top_category)

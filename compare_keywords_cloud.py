@@ -120,12 +120,3 @@ def calculator(keyword, crawler, max_keywords=15):
         })
 
     return sorted(scores, key=lambda x: x["총점"], reverse=True)[:max_keywords]
-
-# Streamlit UI
-st.title("키워드 비교 분석")
-keyword = st.text_input("키워드를 입력하세요:")
-if st.button("분석 시작"):
-    crawler = NaverShoppingCrawler()
-    sorted_scores = calculator(keyword, crawler)
-    df = pd.DataFrame(sorted_scores)
-    st.write(df)
