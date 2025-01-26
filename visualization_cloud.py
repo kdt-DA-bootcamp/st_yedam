@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import time
 
-from collect_keywords import NaverShoppingCrawler
-from compare_keywords import calculator
+from collect_keywords_cloud import NaverShoppingCrawler
+from compare_keywords_cloud import calculator
 
 # Streamlit UI 설정
 
